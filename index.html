@@ -1,837 +1,301 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Disvical — Snipe Services</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-
-html,body{height:100%;}
-
-body{
-    font-family:"Inter",sans-serif;
-    background:#000;
-    color:#fff;
-    overflow-x:hidden;
-    cursor:none;
-    min-height:100vh;
-    position:relative;
-}
-
-.bg{
-    position:fixed;
-    inset:0;
-    z-index:0;
-    overflow:hidden;
-    pointer-events:none;
-}
-.bg::before{
-    content:"";
-    position:absolute;
-    inset:-50%;
-    background:
-        radial-gradient(circle at 30% 40%, rgba(255,255,255,.08), transparent 40%),
-        radial-gradient(circle at 70% 60%, rgba(255,255,255,.05), transparent 40%);
-    animation:bgMove 15s ease-in-out infinite;
-    filter:blur(60px);
-}
-@keyframes bgMove{
-    0%,100%{transform:translate(0,0) scale(1);}
-    33%{transform:translate(10%,-5%) scale(1.15);}
-    66%{transform:translate(-8%,8%) scale(1.1);}
-}
-.bg::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background-image:
-        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
-    background-size:50px 50px;
-    animation:gridMove 4s linear infinite;
-    mask-image:radial-gradient(ellipse at center, black 20%, transparent 80%);
-    -webkit-mask-image:radial-gradient(ellipse at center, black 20%, transparent 80%);
-}
-@keyframes gridMove{
-    from{background-position:0 0;}
-    to{background-position:50px 50px;}
-}
-
-#cursorTrail{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-}
-#cursorTrail{z-index:2147483647;}
-
-.hero{
-    position:relative;
-    z-index:2;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding:60px 30px 80px;
-    gap:55px;
-}
-
-.title{
-    text-align:center;
-    position:relative;
-    animation:titleIn 1.2s cubic-bezier(.4,0,.2,1) both;
-}
-@keyframes titleIn{
-    from{opacity:0;transform:translateY(-50px) scale(.9);}
-    to{opacity:1;transform:translateY(0) scale(1);}
-}
-.title h1{
-    font-family:"Orbitron",sans-serif;
-    font-size:clamp(48px,10vw,140px);
-    font-weight:900;
-    letter-spacing:-2px;
-    line-height:.9;
-    background:linear-gradient(180deg,#fff 0%,#999 50%,#333 100%);
-    -webkit-background-clip:text;
-    background-clip:text;
-    -webkit-text-fill-color:transparent;
-    filter:drop-shadow(0 0 32px rgba(255,255,255,.4)) drop-shadow(0 0 64px rgba(255,255,255,.2));
-    text-transform:uppercase;
-    animation:titleGlow 3s ease-in-out infinite;
-}
-@keyframes titleGlow{
-    0%,100%{filter:drop-shadow(0 0 32px rgba(255,255,255,.4)) drop-shadow(0 0 64px rgba(255,255,255,.2));}
-    50%{filter:drop-shadow(0 0 48px rgba(255,255,255,.55)) drop-shadow(0 0 96px rgba(255,255,255,.3));}
-}
-.title .sub{
-    font-size:14px;
-    letter-spacing:20px;
-    text-transform:uppercase;
-    font-weight:300;
-    margin-top:20px;
-    padding-left:20px;
-    background:linear-gradient(90deg, #000 0%, #fff 50%, #000 100%);
-    background-size:200% 100%;
-    -webkit-background-clip:text;
-    background-clip:text;
-    -webkit-text-fill-color:transparent;
-    animation:gradientShift 6s ease-in-out infinite;
-}
-@keyframes gradientShift{
-    0%,100%{background-position:0% 50%;}
-    50%{background-position:100% 50%;}
-}
-.title::before,
-.title::after{
-    content:"";
-    position:absolute;
-    top:50%;
-    width:80px;
-    height:1px;
-    background:linear-gradient(90deg,transparent,#fff);
-}
-.title::before{left:-100px;}
-.title::after{right:-100px;background:linear-gradient(90deg,#fff,transparent);}
-
-.cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:24px;
-    max-width:1200px;
-    width:100%;
-    animation:cardsIn 1s ease .4s both;
-}
-@keyframes cardsIn{
-    from{opacity:0;transform:translateY(40px);}
-    to{opacity:1;transform:translateY(0);}
-}
-
-.card{
-    position:relative;
-    aspect-ratio:1/1.15;
-    border-radius:24px;
-    background:linear-gradient(145deg, rgba(30,30,30,.7), rgba(10,10,10,.9));
-    cursor:pointer;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:18px;
-    padding:30px;
-    transition:transform .5s cubic-bezier(.4,0,.2,1), box-shadow .5s;
-    backdrop-filter:blur(20px);
-    overflow:hidden;
-    isolation:isolate;
-}
-
-.card::before{
-    content:"";
-    position:absolute;
-    top:50%;
-    left:50%;
-    width:200%;
-    height:200%;
-    transform:translate(-50%,-50%);
-    background:conic-gradient(from 0deg,
-        #000 0deg,
-        #333 30deg,
-        #666 60deg,
-        #999 90deg,
-        #ccc 120deg,
-        #fff 150deg,
-        #fff 180deg,
-        #ccc 210deg,
-        #999 240deg,
-        #666 270deg,
-        #333 300deg,
-        #000 330deg,
-        #000 360deg);
-    animation:rotateBorder 4s linear infinite;
-    opacity:0;
-    transition:opacity .5s ease;
-    pointer-events:none;
-    z-index:1;
-}
-@keyframes rotateBorder{
-    from{transform:translate(-50%,-50%) rotate(0deg);}
-    to{transform:translate(-50%,-50%) rotate(360deg);}
-}
-.card:hover::before{opacity:1;}
-
-.card::after{
-    content:"";
-    position:absolute;
-    inset:3px;
-    border-radius:21px;
-    background:linear-gradient(145deg, #1a1a1a, #0a0a0a);
-    z-index:2;
-    pointer-events:none;
-}
-
-.card .glow{
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    border-radius:24px;
-    background:radial-gradient(circle at var(--mx,50%) var(--my,50%),
-        rgba(255,255,255,.25) 0%,
-        rgba(255,255,255,.1) 25%,
-        transparent 60%);
-    pointer-events:none;
-    opacity:0;
-    transition:opacity .35s ease;
-    z-index:3;
-    filter:blur(6px);
-}
-.card:hover .glow{opacity:1;}
-
-.card > *:not(.glow){
-    position:relative;
-    z-index:4;
-}
-
-.card:hover{
-    transform:translateY(-12px) scale(1.03);
-    box-shadow:0 30px 60px rgba(255,255,255,.15);
-}
-.card:active{
-    transform:translateY(-6px) scale(.98);
-}
-
-.card .icon{
-    width:80px;
-    height:80px;
-    border-radius:50%;
-    background:linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
-    border:1px solid rgba(255,255,255,.3);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:all .5s cubic-bezier(.4,0,.2,1);
-    box-shadow:0 0 24px rgba(255,255,255,.1);
-}
-.card:hover .icon{
-    transform:scale(1.15) rotate(-8deg);
-    background:linear-gradient(145deg, rgba(255,255,255,.25), rgba(255,255,255,.1));
-    box-shadow:0 0 40px rgba(255,255,255,.35);
-}
-.card .icon svg{
-    width:40px;
-    height:40px;
-    stroke:#fff;
-    filter:drop-shadow(0 0 8px rgba(255,255,255,.5));
-    transition:transform .5s ease;
-}
-.card:hover .icon svg{transform:scale(1.1);}
-
-.card .name{
-    font-family:"Orbitron",sans-serif;
-    font-size:18px;
-    font-weight:700;
-    letter-spacing:4px;
-    text-transform:uppercase;
-    color:#fff;
-    text-shadow:0 0 12px rgba(255,255,255,.3);
-    transition:all .4s;
-}
-.card:hover .name{
-    text-shadow:0 0 20px rgba(255,255,255,.6);
-    letter-spacing:6px;
-}
-.card .desc{
-    font-size:11px;
-    letter-spacing:3px;
-    color:rgba(255,255,255,.4);
-    text-transform:uppercase;
-    font-weight:300;
-    transition:color .4s;
-}
-.card:hover .desc{color:rgba(255,255,255,.7);}
-
-.divider{
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:100%;
-    max-width:1000px;
-    margin:20px auto 0;
-    padding:10px 0;
-}
-.divider .line-seg{
-    flex:1;
-    height:3px;
-    background:linear-gradient(90deg,transparent 0%,#fff 50%,transparent 100%);
-    border-radius:3px;
-    box-shadow:
-        0 0 10px rgba(255,255,255,.7),
-        0 0 20px rgba(255,255,255,.4);
-}
-.divider .star{
-    width:44px;
-    height:44px;
-    margin:0 24px;
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    animation:starPulse 3s ease-in-out infinite;
-}
-@keyframes starPulse{
-    0%,100%{
-        transform:scale(1) rotate(0deg);
-        filter:drop-shadow(0 0 12px rgba(255,255,255,.8))
-               drop-shadow(0 0 24px rgba(255,255,255,.5));
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0d11">
+  <meta name="description" content="Disvical sniping services, clear pricing, turnaround information, and biome auto-sniping rates.">
+  <title>Disvical — Sniping Services</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0d11;
+      --surface: #10151b;
+      --surface-raised: #141b22;
+      --line: rgba(220, 235, 245, .11);
+      --text: #f2f6f8;
+      --muted: #9ba8b2;
+      --soft: #c6d0d6;
+      --accent: #6686ad;
+      --accent-ink: #08111b;
+      --radius: 20px;
+      --content: 1120px;
     }
-    50%{
-        transform:scale(1.15) rotate(180deg);
-        filter:drop-shadow(0 0 20px rgba(255,255,255,1))
-               drop-shadow(0 0 40px rgba(255,255,255,.7));
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 82% 5%, rgba(54, 83, 122, .15), transparent 36rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
-}
-.divider .star svg{width:100%;height:100%;display:block;}
-
-#aboutModal{
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%) scale(.8);
-    width:600px;
-    max-width:calc(100vw - 40px);
-    height:520px;
-    max-height:calc(100vh - 40px);
-    background:rgba(10,10,15,.98);
-    border-radius:24px;
-    padding:30px;
-    z-index:999999;
-    box-shadow:
-        0 30px 100px rgba(0,0,0,.8),
-        0 0 64px rgba(255,255,255,.1);
-    opacity:0;
-    pointer-events:none;
-    transition:all .5s cubic-bezier(.4,0,.2,1);
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-    isolation:isolate;
-}
-
-#aboutModal::before{
-    content:"";
-    position:absolute;
-    top:50%;
-    left:50%;
-    width:200%;
-    height:200%;
-    transform:translate(-50%,-50%);
-    background:conic-gradient(from 0deg,
-        #000 0deg,
-        #333 30deg,
-        #666 60deg,
-        #999 90deg,
-        #ccc 120deg,
-        #fff 150deg,
-        #fff 180deg,
-        #ccc 210deg,
-        #999 240deg,
-        #666 270deg,
-        #333 300deg,
-        #000 330deg,
-        #000 360deg);
-    animation:rotateBorderModal 4s linear infinite;
-    opacity:0;
-    transition:opacity .5s ease;
-    pointer-events:none;
-    z-index:1;
-}
-@keyframes rotateBorderModal{
-    from{transform:translate(-50%,-50%) rotate(0deg);}
-    to{transform:translate(-50%,-50%) rotate(360deg);}
-}
-
-#aboutModal::after{
-    content:"";
-    position:absolute;
-    inset:3px;
-    border-radius:21px;
-    background:linear-gradient(145deg, #1a1a1a, #0a0a0a);
-    z-index:2;
-    pointer-events:none;
-}
-
-#aboutModal.active{
-    transform:translate(-50%,-50%) scale(1);
-    opacity:1;
-    pointer-events:auto;
-}
-#aboutModal.active::before{opacity:1;}
-
-#aboutModal > *{
-    position:relative;
-    z-index:3;
-}
-
-#modalTitle{
-    font-family:"Orbitron",sans-serif;
-    font-size:22px;
-    font-weight:900;
-    letter-spacing:6px;
-    text-transform:uppercase;
-    background:linear-gradient(135deg,#fff,#888);
-    -webkit-background-clip:text;
-    background-clip:text;
-    -webkit-text-fill-color:transparent;
-    margin-bottom:20px;
-    display:flex;
-    align-items:center;
-    gap:14px;
-}
-#modalTitle::after{
-    content:"";
-    flex:1;
-    height:1px;
-    background:linear-gradient(90deg, #fff, transparent);
-}
-#aboutText{
-    flex:1;
-    overflow-y:auto;
-    font-size:15px;
-    line-height:1.8;
-    color:#e8e8e8;
-    white-space:pre-line;
-    padding-right:10px;
-    display:flex;
-    flex-direction:column;
-}
-#aboutText::-webkit-scrollbar{width:6px;}
-#aboutText::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:3px;}
-#aboutText::-webkit-scrollbar-thumb{background:#fff;border-radius:3px;box-shadow:0 0 12px #fff;}
-
-#aboutText .text-content{flex:1;}
-
-#aboutText .price-btn-wrapper{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    margin-top:24px;
-    padding-top:20px;
-}
-
-.price-btn{
-    display:inline-block;
-    padding:12px 32px;
-    background:linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.05));
-    border:1px solid #fff;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:13px;
-    font-weight:700;
-    letter-spacing:3px;
-    text-transform:uppercase;
-    color:#fff;
-    transition:all .3s;
-    font-family:"Inter",sans-serif;
-}
-.price-btn:hover{
-    background:linear-gradient(135deg, rgba(255,255,255,.25), rgba(255,255,255,.1));
-    transform:translateY(-2px);
-}
-
-.modal-buttons{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-top:20px;
-    padding-top:20px;
-    border-top:1px solid rgba(255,255,255,.15);
-    gap:12px;
-}
-
-#langSelect{
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.3);
-    color:#fff;
-    font-size:13px;
-    padding:10px 16px;
-    border-radius:12px;
-    cursor:pointer;
-    outline:none;
-    font-family:"Inter",sans-serif;
-    transition:all .3s;
-}
-#langSelect:hover{
-    border-color:#fff;
-}
-#langSelect option{background:#141414;color:#fff;}
-
-button{
-    background:linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
-    border:1px solid rgba(255,255,255,.35);
-    color:#fff;
-    padding:10px 24px;
-    font-size:13px;
-    font-weight:700;
-    letter-spacing:3px;
-    text-transform:uppercase;
-    border-radius:12px;
-    cursor:pointer;
-    font-family:"Inter",sans-serif;
-    transition:all .3s cubic-bezier(.4,0,.2,1);
-}
-button:hover{
-    border-color:#fff;
-    transform:translateY(-2px);
-}
-button:active{transform:translateY(0) scale(.96);}
-
-@media (max-width:1000px){
-    .cards{grid-template-columns:repeat(2,1fr);}
-    .title::before,.title::after{display:none;}
-}
-@media (max-width:560px){
-    .cards{grid-template-columns:1fr;}
-    .title h1{letter-spacing:-1px;}
-    .title .sub{letter-spacing:10px;font-size:11px;}
-    #aboutModal{height:80vh;padding:20px;}
-    .divider .star{width:30px;height:30px;margin:0 14px;}
-    .divider .line-seg{height:2px;}
-}
-</style>
+    a { color: inherit; text-decoration: none; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 5px; }
+    .wrap { width: min(var(--content), calc(100% - 48px)); margin-inline: auto; }
+    .site-header { border-bottom: 1px solid var(--line); animation: siteEntrance .65s cubic-bezier(.2,.7,.2,1) both; }
+    .hero { animation: siteEntrance .75s cubic-bezier(.2,.7,.2,1) .08s both; }
+    @keyframes siteEntrance { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: .13em; font-size: 13px; }
+    .brand-mark {
+      width: 30px; height: 30px; border: 1px solid rgba(102, 134, 173, .55); border-radius: 10px;
+      display: grid; place-items: center; color: var(--accent); font-size: 13px;
+      background: rgba(102, 134, 173, .08);
+    }
+    .nav-links { display: flex; align-items: center; gap: 26px; color: var(--muted); font-size: 13px; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links .nav-cta { color: var(--text); border: 1px solid var(--line); padding: 9px 14px; border-radius: 999px; }
+    .hero { padding: 90px 0 76px; }
+    .hero-grid { display: grid; grid-template-columns: 1.35fr .65fr; align-items: end; gap: 64px; }
+    .eyebrow { color: var(--accent); font-size: 11px; font-weight: 750; letter-spacing: .19em; text-transform: uppercase; }
+    h1 { max-width: 760px; margin: 18px 0 18px; font-size: clamp(42px, 6.8vw, 76px); line-height: 1.02; letter-spacing: -.055em; font-weight: 700; }
+    .hero-copy { max-width: 600px; margin: 0; color: var(--muted); font-size: 17px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .button { position: relative; overflow: hidden; isolation: isolate; min-height: 46px; padding: 0 18px; display: inline-flex; justify-content: center; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 12px; font-size: 13px; font-weight: 700; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+    .nav-links .nav-cta, .links a { position: relative; overflow: hidden; isolation: isolate; transition: transform .16s ease, border-color .18s ease, color .18s ease; }
+    .button:active, .nav-links .nav-cta:active, .links a:active { transform: scale(.97); }
+    .tap-ripple { position: absolute; z-index: 0; left: var(--tap-x); top: var(--tap-y); width: var(--tap-size); height: var(--tap-size); border-radius: 50%; background: rgba(255,255,255,.2); pointer-events: none; transform: translate(-50%,-50%) scale(0); animation: tapRipple .56s ease-out forwards; }
+    @keyframes tapRipple { to { transform: translate(-50%,-50%) scale(1); opacity: 0; } }
+    .button:hover { transform: translateY(-2px); border-color: rgba(102, 134, 173, .5); }
+    .button.primary { color: var(--accent-ink); border-color: var(--accent); background: var(--accent); }
+    .button.secondary { background: rgba(255,255,255,.025); }
+    .hero-note {
+      padding: 22px; border: 1px solid var(--line); border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+    }
+    .note-label { color: var(--muted); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+    .note-time { margin: 5px 0 2px; font-size: 31px; line-height: 1.2; font-weight: 700; letter-spacing: -.04em; }
+    .note-detail { color: var(--soft); font-size: 13px; }
+    .note-divider { height: 1px; background: var(--line); margin: 18px 0 15px; }
+    .priority { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 650; }
+    .priority-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 15px rgba(102,134,173,.5); }
+    section.content-section { padding: 38px 0 42px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+    .section-head h2 { margin: 7px 0 0; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.035em; line-height: 1.15; }
+    .section-head p { max-width: 440px; margin: 0; color: var(--muted); font-size: 13px; }
+    .service-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .card { padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(150deg, rgba(20,27,34,.92), rgba(14,19,25,.94)); }
+    .card-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 17px; }
+    .card h3 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
+    .pill { display: inline-flex; align-items: center; white-space: nowrap; padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--soft); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .pill.free { color: var(--accent); border-color: rgba(102, 134, 173, .28); background: rgba(102, 134, 173, .07); }
+    .price-rows { display: grid; gap: 10px; }
+    .price-row { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; }
+    .price-row span:first-child { color: var(--muted); }
+    .price-row strong { text-align: right; font-size: 13px; font-weight: 650; }
+    .card-copy { margin: 0; color: var(--muted); font-size: 13px; }
+    .card-note { margin: 14px 0 0; padding-top: 13px; border-top: 1px solid var(--line); color: var(--soft); font-size: 12px; }
+    .auto-section { padding-top: 24px !important; }
+    .auto-card { position: relative; overflow: hidden; padding: 30px; border: 1px solid rgba(102,134,173,.22); border-radius: 24px; background: linear-gradient(115deg, rgba(102,134,173,.075), rgba(16,21,27,.9) 42%, rgba(16,21,27,.95)); }
+    .auto-card::after { content: ""; position: absolute; width: 300px; height: 300px; right: -140px; top: -190px; border-radius: 50%; background: rgba(102,134,173,.09); filter: blur(55px); pointer-events: none; }
+    .auto-layout { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; }
+    .auto-title { margin: 8px 0 8px; font-size: clamp(24px, 3.5vw, 36px); letter-spacing: -.04em; line-height: 1.12; }
+    .auto-desc { margin: 0; color: var(--muted); font-size: 14px; }
+    .auto-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .rate { padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(5,10,13,.32); }
+    .rate span { display: block; color: var(--muted); font-size: 11px; }
+    .rate strong { display: block; margin-top: 5px; font-size: 19px; letter-spacing: -.02em; }
+    .auto-foot { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 9px; margin-top: 22px; }
+    .auto-foot span { padding: 7px 10px; border: 1px solid var(--line); border-radius: 9px; color: var(--soft); font-size: 11px; }
+    .order-strip { margin-top: 38px; padding: 21px 23px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.025); }
+    .order-strip strong { display: block; font-size: 14px; }
+    .order-strip p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .links { display: flex; flex-wrap: wrap; gap: 9px; }
+    .links a { padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px; color: var(--soft); font-size: 11px; font-weight: 650; }
+    .links a:hover { color: var(--text); border-color: rgba(102,134,173,.4); }
+    .motion-ready .reveal { opacity: 0; transform: translateY(16px); transition: opacity .62s cubic-bezier(.2,.7,.2,1) var(--reveal-delay, 0ms), transform .62s cubic-bezier(.2,.7,.2,1) var(--reveal-delay, 0ms); }
+    .motion-ready .reveal.is-visible { opacity: 1; transform: translateY(0); }
+    footer { margin-top: 64px; border-top: 1px solid var(--line); color: #77848e; font-size: 11px; }
+    .footer-inner { min-height: 68px; display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+    @media (max-width: 760px) {
+      .wrap { width: min(var(--content), calc(100% - 32px)); }
+      .nav { min-height: 68px; }
+      .nav-links { gap: 15px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .hero { padding: 67px 0 45px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 30px; }
+      .hero-note { max-width: 440px; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 10px; }
+      .auto-layout { grid-template-columns: 1fr; gap: 23px; }
+      .order-strip { align-items: flex-start; flex-direction: column; }
+      .footer-inner { padding: 16px 0; flex-direction: column; align-items: flex-start; justify-content: center; }
+    }
+    @media (max-width: 560px) {
+      .service-grid { grid-template-columns: 1fr; }
+      .card { padding: 20px; }
+      .auto-card { padding: 22px; }
+      .auto-prices { grid-template-columns: 1fr; }
+      .hero-copy { font-size: 15px; }
+      .price-row { align-items: flex-start; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+      .motion-ready .reveal { opacity: 1; transform: none; }
+    }
+  </style>
 </head>
-
 <body>
-
-<div class="bg"></div>
-<canvas id="cursorTrail"></canvas>
-
-<section class="hero">
-
-    <div class="title">
-        <h1>Disvical</h1>
-        <div class="sub">Snipe Services</div>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="#top" aria-label="Disvical home"><span class="brand-mark" aria-hidden="true"></span> DISVICAL</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#services">Services</a>
+        <a href="#auto-sniping">Auto-sniping</a>
+        <a class="nav-cta" href="https://discord.gg/2ERVfhzzZr" target="_blank" rel="noopener noreferrer">Contact on Discord <span aria-hidden="true">↗</span></a>
+      </nav>
     </div>
+  </header>
 
-    <div class="cards">
-
-        <div class="card" data-link="https://www.youtube.com/@disvical">
-            <div class="glow"></div>
-            <div class="icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-            </div>
-            <div class="name">YouTube</div>
-            <div class="desc">Subscribe</div>
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">Roblox · Sniping services</div>
+          <h1>Focused snipes.<br>Clear service terms.</h1>
+          <p class="hero-copy">Glitch, Dreamspace, Singularity and biome services with straightforward pricing and a clear turnaround.</p>
+          <div class="actions">
+            <a class="button primary" href="#services">Explore services <span aria-hidden="true">↓</span></a>
+            <a class="button secondary" href="https://www.youtube.com/@disvical" target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a>
+          </div>
         </div>
+        <aside class="hero-note" aria-label="Turnaround and priority information">
+          <div class="note-label">Typical turnaround</div>
+          <div class="note-time">Within 24 hours</div>
+          <div class="note-detail">Most requests are completed within one day.</div>
+          <div class="note-divider"></div>
+          <div class="priority"><span class="priority-dot" aria-hidden="true"></span> Paid requests receive priority</div>
+        </aside>
+      </div>
+    </section>
 
-        <div class="card" data-action="about">
-            <div class="glow"></div>
-            <div class="icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="7" r="4"></circle>
-                    <path d="M5.5 21a8.38 8.38 0 0 1 13 0"></path>
-                </svg>
-            </div>
-            <div class="name">About</div>
-            <div class="desc">Who am I</div>
+    <section class="content-section" id="services">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="eyebrow">Service menu</div><h2>Sniping services</h2></div>
+          <p>For Glitch and Dreamspace, requests with 200 or more Heavenlys are free. Below 200, the price is 300 Robux.</p>
         </div>
-
-        <div class="card" data-link="https://discord.gg/2ERVfhzzZr">
-            <div class="glow"></div>
-            <div class="icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
+        <div class="service-grid">
+          <article class="card">
+            <div class="card-top"><h3>Glitch &amp; Dreamspace</h3><span class="pill free">Free at 200+ HPs</span></div>
+            <div class="price-rows">
+              <div class="price-row"><span>200+ Heavenlys</span><strong>Free</strong></div>
+              <div class="price-row"><span>Below 200 Heavenlys</span><strong>300 Robux</strong></div>
             </div>
-            <div class="name">Discord</div>
-            <div class="desc">Join Server</div>
-        </div>
-
-        <div class="card" data-link="https://www.roblox.com/pt/users/4370995126">
-            <div class="glow"></div>
-            <div class="icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="14" rx="2"></rect>
-                    <path d="M8 21l4-4 4 4"></path>
-                </svg>
+            <p class="card-note">Most requests are completed within 24 hours. Paid requests receive priority.</p>
+          </article>
+          <article class="card">
+            <div class="card-top"><h3>Singularity</h3><span class="pill">Available</span></div>
+            <div class="price-rows">
+              <div class="price-row"><span>20+ HPs</span><strong>Free</strong></div>
+              <div class="price-row"><span>YouTube feature</span><strong>100+ HPs</strong></div>
             </div>
-            <div class="name">Roblox</div>
-            <div class="desc">Profile</div>
+            <p class="card-note">Usually completed in under one hour. Singularity requests receive priority.</p>
+          </article>
+          <article class="card">
+            <div class="card-top"><h3>Cyberspace</h3><span class="pill">Coming later</span></div>
+            <p class="card-copy">Cyberspace sniping is not available yet.</p>
+          </article>
+          <article class="card">
+            <div class="card-top"><h3>Mari</h3><span class="pill">Item snipes</span></div>
+            <div class="price-rows">
+              <div class="price-row"><span>Void Coin</span><strong>20 (after tax)</strong></div>
+              <div class="price-row"><span>Lucky Penny</span><strong>10 (after tax)</strong></div>
+            </div>
+          </article>
         </div>
+        <div class="order-strip">
+          <div><strong>Need an instant snipe?</strong><p>Priority category: 1,000 Robux.</p></div>
+          <div class="links"><a href="https://discord.gg/2ERVfhzzZr" target="_blank" rel="noopener noreferrer">Request on Discord ↗</a></div>
+        </div>
+      </div>
+    </section>
 
+    <section class="content-section auto-section" id="auto-sniping">
+      <div class="wrap">
+        <div class="auto-card">
+          <div class="auto-layout">
+            <div>
+              <div class="eyebrow">Separate service · does not count toward queue</div>
+              <h2 class="auto-title">Biome auto-sniping</h2>
+              <p class="auto-desc">Available for all biomes except rare biomes. Choose the rate that fits your setup.</p>
+            </div>
+            <div class="auto-prices" aria-label="Biome auto-sniping rates">
+              <div class="rate"><span>Without fishing</span><strong>50 Robux / hour</strong></div>
+              <div class="rate"><span>Fishing in the biome</span><strong>100 Robux / hour</strong></div>
+            </div>
+          </div>
+          <div class="auto-foot">
+            <span>Rare biomes excluded</span>
+            <span>Does not count toward queue</span>
+            <span>Singularity is not available for auto-sniping</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>© Disvical · Sniping Services</span>
+      <div class="links" aria-label="Social links">
+        <a href="https://www.youtube.com/@disvical" target="_blank" rel="noopener noreferrer">YouTube ↗</a>
+        <a href="https://discord.gg/2ERVfhzzZr" target="_blank" rel="noopener noreferrer">Discord ↗</a>
+        <a href="https://www.roblox.com/pt/users/4370995126" target="_blank" rel="noopener noreferrer">Roblox ↗</a>
+      </div>
     </div>
+  </footer>
+  <script>
+    (() => {
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reducedMotion) return;
 
-    <div class="divider">
-        <div class="line-seg"></div>
-        <div class="star">
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <path d="M50 8 C54 38 62 46 92 50 C62 54 54 62 50 92 C46 62 38 54 8 50 C38 46 46 38 50 8 Z"
-                      fill="#ffffff"/>
-            </svg>
-        </div>
-        <div class="line-seg"></div>
-    </div>
-
-</section>
-
-<div id="aboutModal">
-    <div id="modalTitle">About me</div>
-    <div id="aboutText"></div>
-    <div class="modal-buttons">
-        <select id="langSelect">
-            <option value="en">English</option>
-            <option value="pt">Português</option>
-            <option value="es">Español</option>
-            <option value="de">Deutsch</option>
-            <option value="kr">한국어</option>
-            <option value="jp">日本語</option>
-            <option value="cn">中文</option>
-        </select>
-        <button onclick="closeAbout()">Close</button>
-    </div>
-</div>
-
-<script>
-const modal = document.getElementById("aboutModal");
-const text = document.getElementById("aboutText");
-const select = document.getElementById("langSelect");
-const title = document.getElementById("modalTitle");
-
-const translations = {
-    en:{
-        aboutTitle:"About me",
-        aboutText:`Hi, I'm Disvical, nice to meet you!\n\nI'm a high-level sniper and I finish my snipes in 2 days or less.\n\nDiscord @disvical`,
-        pricesTitle:"Prices",
-        pricesText:`--- Robux Only ---\n\nFree Category:\nGlitch Snipe: 200+ HPs (500+ for priority)\n~ 750 if less than 200 HPs\n\nDreamspace Snipe: 200+ HPs (500+ for priority)\n~ 750 if less than 200 HPs\n\nSingularity Snipe: 20+ HPs (100+ to post on yt)\n~ all free! :)\n\nCyberspace Snipe:\nNot available yet\n\nMari Snipe:\n20 = Void Coin (After tax)\n10 = Lucky Penny (After tax)\n\nPriority Category:\n1000 = Instant Snipe\n\nExpect to have your snipe done in 1-2 days\nI usually finish a singularity snipe in less than 1 hour\nSingularity snipes will always have priority`,
-        viewPrices:"View Prices",
-        back:"Back"
-    },
-    pt:{
-        aboutTitle:"Sobre mim",
-        aboutText:`Olá, eu sou o Disvical, prazer em te conhecer!\n\nSou um sniper de alto nível e finalizo meus snipes em 2 dias ou menos.\n\nDiscord @disvical`,
-        pricesTitle:"Preços",
-        pricesText:`--- Apenas Robux ---\n\nCategoria Grátis:\nGlitch Snipe: 200+ HPs (500+ para prioridade)\n~ 750 se menos de 200 HPs\n\nDreamspace Snipe: 200+ HPs (500+ para prioridade)\n~ 750 se menos de 200 HPs\n\nSingularity Snipe: 20+ HPs (100+ para postar no yt)\n~ tudo grátis! :)\n\nCyberspace Snipe:\nAinda não disponível\n\nMari Snipe:\n20 = Void Coin (Após taxa)\n10 = Lucky Penny (Após taxa)\n\nCategoria Prioridade:\n1000 = Snipe Instantâneo\n\nEspere ter seu snipe feito em 1-2 dias\nEu geralmente termino um singularity snipe em menos de 1 hora\nSnipes de singularity sempre terão prioridade`,
-        viewPrices:"Ver Preços",
-        back:"Voltar"
-    },
-    es:{
-        aboutTitle:"Sobre mí",
-        aboutText:`¡Hola, soy Disvical, un placer conocerte!\n\nSoy un sniper de alto nivel y termino mis snipes en 2 días o menos.\n\nDiscord @disvical`,
-        pricesTitle:"Precios",
-        pricesText:`--- Solo Robux ---\n\nCategoría Gratis:\nGlitch Snipe: 200+ HPs (500+ para prioridad)\n~ 750 si menos de 200 HPs\n\nDreamspace Snipe: 200+ HPs (500+ para prioridad)\n~ 750 si menos de 200 HPs\n\nSingularity Snipe: 20+ HPs (100+ para publicar en yt)\n~ ¡todo gratis! :)\n\nCyberspace Snipe:\nAún no disponible\n\nMari Snipe:\n20 = Void Coin (Después de impuestos)\n10 = Lucky Penny (Después de impuestos)\n\nCategoría Prioridad:\n1000 = Snipe Instantáneo\n\nEspera tener tu snipe hecho en 1-2 días\nNormalmente termino un singularity snipe en menos de 1 hora\nLos snipes de singularity siempre tendrán prioridad`,
-        viewPrices:"Ver Precios",
-        back:"Volver"
-    },
-    de:{
-        aboutTitle:"Über mich",
-        aboutText:`Hi, ich bin Disvical, freut mich!\n\nIch bin ein High-Level-Sniper und beende meine Snipes in 2 Tagen oder weniger.\n\nDiscord @disvical`,
-        pricesTitle:"Preise",
-        pricesText:`--- Nur Robux ---\n\nKostenlose Kategorie:\nGlitch Snipe: 200+ HPs (500+ für Priorität)\n~ 750 wenn weniger als 200 HPs\n\nDreamspace Snipe: 200+ HPs (500+ für Priorität)\n~ 750 wenn weniger als 200 HPs\n\nSingularity Snipe: 20+ HPs (100+ um auf yt zu posten)\n~ alles kostenlos! :)\n\nCyberspace Snipe:\nNoch nicht verfügbar\n\nMari Snipe:\n20 = Void Coin (Nach Steuern)\n10 = Lucky Penny (Nach Steuern)\n\nPrioritätskategorie:\n1000 = Instant Snipe\n\nErwarte, dass dein Snipe in 1-2 Tagen fertig ist\nIch beende einen Singularity-Snipe normalerweise in weniger als 1 Stunde\nSingularity-Snipes haben immer Priorität`,
-        viewPrices:"Preise ansehen",
-        back:"Zurück"
-    },
-    kr:{
-        aboutTitle:"소개",
-        aboutText:`안녕하세요, 저는 Disvical입니다. 만나서 반갑습니다!\n\n저는 고급 스나이퍼이며 2일 이내에 스나이프를 완료합니다.\n\nDiscord @disvical`,
-        pricesTitle:"가격",
-        pricesText:`--- Robux 전용 ---\n\n무료 카테고리:\nGlitch Snipe: 200+ HPs (우선순위 500+)\n~ 200 HPs 미만인 경우 750\n\nDreamspace Snipe: 200+ HPs (우선순위 500+)\n~ 200 HPs 미만인 경우 750\n\nSingularity Snipe: 20+ HPs (yt에 게시하려면 100+)\n~ 모두 무료! :)\n\nCyberspace Snipe:\n아직 사용 불가\n\nMari Snipe:\n20 = Void Coin (세금 후)\n10 = Lucky Penny (세금 후)\n\n우선순위 카테고리:\n1000 = 즉시 스나이프\n\n1-2일 내에 스나이프가 완료될 것으로 예상하세요\n저는 보통 singularity snipe를 1시간 이내에 완료합니다\nSingularity snipes는 항상 우선순위를 갖습니다`,
-        viewPrices:"가격 보기",
-        back:"뒤로"
-    },
-    jp:{
-        aboutTitle:"自己紹介",
-        aboutText:`こんにちは、Disvicalです。はじめまして！\n\n私はハイレベルなスナイパーで、2日以内にスナイプを完了します。\n\nDiscord @disvical`,
-        pricesTitle:"価格",
-        pricesText:`--- Robux のみ ---\n\n無料カテゴリ:\nGlitch Snipe: 200+ HPs (優先 500+)\n~ 200 HPs 未満の場合は 750\n\nDreamspace Snipe: 200+ HPs (優先 500+)\n~ 200 HPs 未満の場合は 750\n\nSingularity Snipe: 20+ HPs (yt に投稿するには 100+)\n~ すべて無料! :)\n\nCyberspace Snipe:\nまだ利用できません\n\nMari Snipe:\n20 = Void Coin (税込)\n10 = Lucky Penny (税込)\n\n優先カテゴリ:\n1000 = 即時スナイプ\n\n1〜2 日以内にスナイプが完了することを期待してください\n通常、singularity snipe は 1 時間以内に完了します\nSingularity snipes は常に優先されます`,
-        viewPrices:"価格を見る",
-        back:"戻る"
-    },
-    cn:{
-        aboutTitle:"关于我",
-        aboutText:`你好，我是 Disvical，很高兴认识你！\n\n我是一名高级狙击手，会在 2 天内完成狙击。\n\nDiscord @disvical`,
-        pricesTitle:"价格",
-        pricesText:`--- 仅限 Robux ---\n\n免费类别:\nGlitch Snipe: 200+ HPs (优先 500+)\n~ 少于 200 HPs 则 750\n\nDreamspace Snipe: 200+ HPs (优先 500+)\n~ 少于 200 HPs 则 750\n\nSingularity Snipe: 20+ HPs (发布到 yt 需要 100+)\n~ 全部免费! :)\n\nCyberspace Snipe:\n暂不可用\n\nMari Snipe:\n20 = Void Coin (税后)\n10 = Lucky Penny (税后)\n\n优先类别:\n1000 = 即时狙击\n\n预计在 1-2 天内完成您的狙击\n我通常在 1 小时内完成 singularity snipe\nSingularity snipes 将始终优先`,
-        viewPrices:"查看价格",
-        back:"返回"
-    }
-};
-
-function openAbout(){
-    modal.classList.add("active");
-    setLang(select.value);
-}
-function closeAbout(){modal.classList.remove("active");}
-
-function setLang(lang){
-    const t = translations[lang];
-    text.innerHTML = `
-        <div class="text-content">${t.aboutText.replace(/\n/g,'<br>')}</div>
-        <div class="price-btn-wrapper">
-            <span class="price-btn" onclick="togglePrices()">${t.viewPrices}</span>
-        </div>
-    `;
-    title.innerText = t.aboutTitle;
-}
-
-function togglePrices(){
-    const lang = select.value;
-    const t = translations[lang];
-    text.innerHTML = `
-        <div class="text-content">${t.pricesText.replace(/\n/g,'<br>')}</div>
-        <div class="price-btn-wrapper">
-            <span class="price-btn" onclick="setLang('${lang}')">${t.back}</span>
-        </div>
-    `;
-    title.innerText = t.pricesTitle;
-}
-
-select.addEventListener('change', () => setLang(select.value));
-
-document.querySelectorAll('.card').forEach(card => {
-    const glow = card.querySelector('.glow');
-
-    card.addEventListener('mousemove', e => {
-        const r = card.getBoundingClientRect();
-        glow.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-        glow.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
-    });
-
-    card.addEventListener('click', () => {
-        card.style.transform = 'scale(.94)';
-        setTimeout(() => card.style.transform = '', 180);
-
-        const action = card.dataset.action;
-        const link = card.dataset.link;
-        if (action === 'about') openAbout();
-        else if (link) window.open(link, '_blank');
-    });
-});
-
-const tcanvas=document.getElementById("cursorTrail");
-const tctx=tcanvas.getContext("2d");
-tcanvas.width=innerWidth; tcanvas.height=innerHeight;
-
-let points=[];
-let mouse={x:innerWidth/2,y:innerHeight/2};
-let bursts=[];
-let mouseVisible = false;
-
-document.addEventListener("mousemove", e => {
-    mouse.x=e.clientX; mouse.y=e.clientY;
-    if (!mouseVisible) mouseVisible = true;
-});
-document.addEventListener("mouseleave", () => {mouseVisible = false;});
-document.addEventListener("mousedown", () => {
-    for (let i=0;i<15;i++){
-        bursts.push({
-            x:mouse.x, y:mouse.y,
-            vx:(Math.random()-.5)*10,
-            vy:(Math.random()-.5)*10,
-            life:1
+      if ('IntersectionObserver' in window) {
+        const revealItems = document.querySelectorAll('.hero-grid > *, .section-head, .card, .order-strip, .auto-card, footer');
+        revealItems.forEach((item, index) => {
+          item.classList.add('reveal');
+          if (item.classList.contains('card')) {
+            const cardIndex = Array.from(item.parentElement.children).indexOf(item);
+            item.style.setProperty('--reveal-delay', `${cardIndex * 70}ms`);
+          }
         });
-    }
-});
+        document.documentElement.classList.add('motion-ready');
+        const observer = new IntersectionObserver((entries, currentObserver) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              currentObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -36px 0px' });
+        revealItems.forEach(item => observer.observe(item));
+      }
 
-function drawCursor(){
-    tctx.clearRect(0,0,tcanvas.width,tcanvas.height);
-    if (!mouseVisible){requestAnimationFrame(drawCursor);return;}
-
-    points.push({x:mouse.x,y:mouse.y});
-    if (points.length>25)points.shift();
-
-    for (let i=0;i<points.length;i++){
-        let p=points[i];
-        let a=i/points.length;
-        tctx.beginPath();
-        tctx.fillStyle=`rgba(255,255,255,${a})`;
-        tctx.shadowBlur=20;
-        tctx.shadowColor="#fff";
-        tctx.arc(p.x,p.y,6*a+1,0,Math.PI*2);
-        tctx.fill();
-    }
-    for (let i=bursts.length-1;i>=0;i--){
-        let b=bursts[i];
-        b.x+=b.vx; b.y+=b.vy;
-        b.vx*=.93; b.vy*=.93;
-        b.life-=.025;
-        if (b.life<=0){bursts.splice(i,1);continue;}
-        tctx.beginPath();
-        tctx.fillStyle=`rgba(255,255,255,${b.life})`;
-        tctx.shadowBlur=16;
-        tctx.shadowColor="#fff";
-        tctx.arc(b.x,b.y,3*b.life,0,Math.PI*2);
-        tctx.fill();
-    }
-    tctx.beginPath();
-    tctx.fillStyle="#fff";
-    tctx.shadowBlur=24;
-    tctx.shadowColor="#fff";
-    tctx.arc(mouse.x,mouse.y,5,0,Math.PI*2);
-    tctx.fill();
-
-    tctx.beginPath();
-    tctx.strokeStyle="rgba(255,255,255,.7)";
-    tctx.lineWidth=1.5;
-    tctx.shadowBlur=16;
-    tctx.shadowColor="#fff";
-    tctx.arc(mouse.x,mouse.y,14,0,Math.PI*2);
-    tctx.stroke();
-
-    requestAnimationFrame(drawCursor);
-}
-drawCursor();
-
-addEventListener('resize', () => {
-    canvas.width=innerWidth; canvas.height=innerHeight;
-    tcanvas.width=innerWidth; tcanvas.height=innerHeight;
-});
-</script>
-
+      document.addEventListener('click', event => {
+        const target = event.target.closest('a, button');
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        const size = Math.max(rect.width, rect.height) * 2.2;
+        ripple.className = 'tap-ripple';
+        ripple.style.setProperty('--tap-x', `${event.clientX - rect.left}px`);
+        ripple.style.setProperty('--tap-y', `${event.clientY - rect.top}px`);
+        ripple.style.setProperty('--tap-size', `${size}px`);
+        target.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+      });
+    })();
+  </script>
 </body>
 </html>
